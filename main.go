@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/thinkpaduser/gobot/config"
+	"flag"
 	"github.com/Syfaro/telegram-bot-api"
 	"log"
 	"math/rand"
@@ -10,14 +12,35 @@ import (
 	"time"
 )
 
-var WorkAnswers = [...]string{"Ты хотел сказать \"чиллить\"?", "Ну я лично скоро на Охотном чилить буду", "Опять на работу пиздос"}
+var conf *config.Config
 
-func RandomizeAnswers(Collection [3]string) string {
+func RandomizeAnswers(Collection []string) string {
 	s1 := rand.NewSource(time.Now().UnixNano())
 	AnsIndex := rand.New(s1).Intn(len(Collection))
 	return Collection[AnsIndex]
 }
+
+func init() {
+	const (
+		defaultConfigFilename = "./configs/conf.yaml"
+	)
+	var err error
+	var configFilename string
+	flag.StringVar(&configFilename, "config", defaultConfigFilename, "the config filename")
+	flag.Parse()
+	if err = initConf(configFilename); err != nil {
+		log.Panic("Can't init config: %s", err.Error())
+	}
+}
+func initConf(filename string) (err error) {
+	if conf, err = config.NewConfig(filename); err != nil {
+		return
+	}
+	return
+}
+
 func main() {
+	WorkAnswers := []string{"Ты хотел сказать \"чиллить\"?", "Ну я лично скоро на Охотном чилить буду", "Опять на работу пиздос"}
 	proxyUrl, err := url.Parse("socks5://127.0.0.1:9050") // Proxy pass
 	if err != nil {
 		log.Panic(err)
@@ -25,7 +48,7 @@ func main() {
 	transport := &http.Transport{Proxy: http.ProxyURL(proxyUrl)}
 	client := &http.Client{Transport: transport}
 	// Auth section
-	bot, err := tgbotapi.NewBotAPIWithClient("token", client) //TODO: configs->config.yaml
+	bot, err := tgbotapi.NewBotAPIWithClient(conf.Token, client) //TODO: configs->config.yaml
 	if err != nil {
 		log.Panic(err)
 	}
