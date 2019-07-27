@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/thinkpaduser/gobot/config"
+	"./pkg"
 	"flag"
 	"github.com/Syfaro/telegram-bot-api"
 	"log"
@@ -33,7 +33,7 @@ func init() {
 	}
 }
 func initConf(filename string) (err error) {
-	if conf, err = config.NewConfig(filename); err != nil {
+	if conf, err = config.NewConf(filename); err != nil {
 		return
 	}
 	return
@@ -48,7 +48,7 @@ func main() {
 	transport := &http.Transport{Proxy: http.ProxyURL(proxyUrl)}
 	client := &http.Client{Transport: transport}
 	// Auth section
-	bot, err := tgbotapi.NewBotAPIWithClient(conf.Token, client) //TODO: configs->config.yaml
+	bot, err := tgbotapi.NewBotAPIWithClient(conf.Conf.Token, client) //TODO: configs->config.yaml
 	if err != nil {
 		log.Panic(err)
 	}
