@@ -13,6 +13,7 @@ import (
 )
 
 var conf *config.Config
+var mess config.MsgDB
 
 func RandomizeAnswers(Collection []string) string {
 	s1 := rand.NewSource(time.Now().UnixNano())
@@ -23,6 +24,7 @@ func RandomizeAnswers(Collection []string) string {
 func init() {
 	const (
 		defaultConfigFilename = "./configs/conf.yaml"
+		defaultMessagesFilename = "./configs/messages.yaml"
 	)
 	var err error
 	var configFilename string
@@ -31,12 +33,22 @@ func init() {
 	if err = initConf(configFilename); err != nil {
 		log.Panic("Can't init config: %s", err.Error())
 	}
+	if err = initMsgDB(defaultMessagesFilename); err != nil {
+                log.Panic("Can't init messages storage: %s", err.Error())
+        }
 }
 func initConf(filename string) (err error) {
 	if conf, err = config.NewConf(filename); err != nil {
 		return
 	}
 	return
+}
+
+func initMsgDB(filename string) (err error) {
+        if mess, err = config.NewMsgDB(filename); err != nil {
+                return
+        }
+        return
 }
 
 func main() {
