@@ -53,6 +53,8 @@ func initMsgDB(filename string) (err error) {
 
 func main() {
 	WorkAnswers := []string{"Ты хотел сказать \"чиллить\"?", "Ну я лично скоро на Охотном чилить буду", "Опять на работу пиздос"}
+	FactAnswers := []string{"То что в рашке нет конституции это факт", "Факт это когда ты неправ короче", "Если тебе нужен факт - чекни лс"}
+	KFCAnswers := []string{"3870 чекай кстати, нидораха", "Ну я в канал абузы кинул, так что чекай", "Ну и что что говно, #затонидораха"}
 	proxyUrl, err := url.Parse("socks5://127.0.0.1:9050") // Proxy pass
 	if err != nil {
 		log.Panic(err)
@@ -78,8 +80,8 @@ func main() {
 			switch update.Message.Command() {
 			case "about":
 				msg.Text = "Меня зовут Гореси. Если вы считаете, что я имею отношение к любому реальному человеку, или являюсь какой-либо отсылкой, то вы, наверное, долбоёб"
-			case "fact":
-				msg.Text = "Ну вообще-то субъективно объективно фактически это моё мнение."
+			case "abuse":
+				msg.Text = "Список актуальных абуз KFC: 3870 - боксмастер, картошка, напиток 300мл - 184р (ТОП); 3869 - любой кофе 200мл - 45р; 3878 - твистер, картошка, напиток 400мл - 169р "
 			default:
 				msg.Text = "Error: ты пидор, нет такой команды"
 			}
@@ -107,6 +109,14 @@ func main() {
 		case strings.Contains(msg.Text, "хорошо плохо"):
 			msg.ReplyToMessageID = update.Message.MessageID
 			msg.Text = "Ну они с фиником вообще-то меня тупо хейтят постоянно"
+			bot.Send(msg)
+		case strings.Contains(msg.Text, "факт"):
+			msg.ReplyToMessageID = update.Message.MessageID
+			msg.Text = RandomizeAnswers(FactAnswers)
+			bot.Send(msg)
+		case strings.Contains(msg.Text, "KFC"):
+			msg.ReplyToMessageID = update.Message.MessageID
+			msg.Text = RandomizeAnswers(KFCAnswers)
 			bot.Send(msg)
 		}
 	}
