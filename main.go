@@ -15,7 +15,7 @@ import (
 var conf *config.Config
 var mess config.MsgDB
 
-func RandomizeAnswers(Collection []string) string {
+func RandomizeAnswers(Collection []string) string { // Returns the random value from an array
 	s1 := rand.NewSource(time.Now().UnixNano())
 	AnsIndex := rand.New(s1).Intn(len(Collection))
 	return Collection[AnsIndex]
@@ -28,7 +28,7 @@ func init() {
 	)
 	var err error
 	var configFilename string
-	flag.StringVar(&configFilename, "config", defaultConfigFilename, "the config filename")
+	flag.StringVar(&configFilename, "config", defaultConfigFilename, "the config filename") // Optional app [configfile] launch option for custom configuration
 	flag.Parse()
 	if err = initConf(configFilename); err != nil {
 		log.Panic("Can't init config: %s", err.Error())
@@ -37,14 +37,14 @@ func init() {
                 log.Panic("Can't init messages storage: %s", err.Error())
         }
 }
-func initConf(filename string) (err error) {
+func initConf(filename string) (err error) { // Importing config structure
 	if conf, err = config.NewConf(filename); err != nil {
 		return
 	}
 	return
 }
 
-func initMsgDB(filename string) (err error) {
+func initMsgDB(filename string) (err error) { // Importing messages hash table
         if mess, err = config.NewMsgDB(filename); err != nil {
                 return
         }
@@ -62,7 +62,7 @@ func main() {
 	transport := &http.Transport{Proxy: http.ProxyURL(proxyUrl)}
 	client := &http.Client{Transport: transport}
 	// Auth section
-	bot, err := tgbotapi.NewBotAPIWithClient(conf.Conf.Token, client) //TODO: configs->config.yaml
+	bot, err := tgbotapi.NewBotAPIWithClient(conf.Conf.Token, client)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -89,7 +89,7 @@ func main() {
 		}
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		switch {
+		switch { // TODO: refactor this section. Use map[string][]string instead of this crappy code below
 		case strings.Contains(msg.Text, "работать"):
 			msg.ReplyToMessageID = update.Message.MessageID
 			msg.Text = RandomizeAnswers(WorkAnswers)
