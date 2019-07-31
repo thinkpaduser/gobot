@@ -51,10 +51,20 @@ func initMsgDB(filename string) (err error) { // Importing messages hash table
         return
 }
 
+func TraverseMap(m map[string][]string, s string) string {
+	var res string
+	for k, v := range m {
+		if strings.Contains(s, k) {
+			res = RandomizeAnswers(v)
+		}
+	}
+	return res
+}
+
 func main() {
-	WorkAnswers := []string{"Ты хотел сказать \"чиллить\"?", "Ну я лично скоро на Охотном чилить буду", "Опять на работу пиздос"}
-	FactAnswers := []string{"То что в рашке нет конституции это факт", "Факт это когда ты неправ короче", "Если тебе нужен факт - чекни лс"}
-	KFCAnswers := []string{"3870 чекай кстати, нидораха", "Ну я в канал абузы кинул, так что чекай", "Ну и что что говно, #затонидораха"}
+	//WorkAnswers := []string{"Ты хотел сказать \"чиллить\"?", "Ну я лично скоро на Охотном чилить буду", "Опять на работу пиздос"}
+	//FactAnswers := []string{"То что в рашке нет конституции это факт", "Факт это когда ты неправ короче", "Если тебе нужен факт - чекни лс"}
+	//KFCAnswers := []string{"3870 чекай кстати, нидораха", "Ну я в канал абузы кинул, так что чекай", "Ну и что что говно, #затонидораха"}
 	proxyUrl, err := url.Parse("socks5://127.0.0.1:9050") // Proxy pass
 	if err != nil {
 		log.Panic(err)
@@ -89,34 +99,8 @@ func main() {
 		}
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		switch { // TODO: refactor this section. Use map[string][]string instead of this crappy code below
-		case strings.Contains(msg.Text, "работать"):
-			msg.ReplyToMessageID = update.Message.MessageID
-			msg.Text = RandomizeAnswers(WorkAnswers)
-			bot.Send(msg)
-		case strings.Contains(msg.Text, "финик"):
-			msg.ReplyToMessageID = update.Message.MessageID
-			msg.Text = "Ну вообще-то финик заебал меня хейтить"
-			bot.Send(msg)
-		case strings.Contains(msg.Text, "залупин"):
-			msg.ReplyToMessageID = update.Message.MessageID
-			msg.Text = "Залупин бы сначала научился микротик настраивать"
-			bot.Send(msg)
-		case strings.Contains(msg.Text, "справедливо"):
-			msg.ReplyToMessageID = update.Message.MessageID
-			msg.Text = "имхо нет"
-			bot.Send(msg)
-		case strings.Contains(msg.Text, "хорошо плохо"):
-			msg.ReplyToMessageID = update.Message.MessageID
-			msg.Text = "Ну они с фиником вообще-то меня тупо хейтят постоянно"
-			bot.Send(msg)
-		case strings.Contains(msg.Text, "факт"):
-			msg.ReplyToMessageID = update.Message.MessageID
-			msg.Text = RandomizeAnswers(FactAnswers)
-			bot.Send(msg)
-		case strings.Contains(msg.Text, "KFC"):
-			msg.ReplyToMessageID = update.Message.MessageID
-			msg.Text = RandomizeAnswers(KFCAnswers)
+		if TraverseMap(mess, msg.Text) != "" {
+			msg.Text = TraverseMap(mess, msg.Text)
 			bot.Send(msg)
 		}
 	}
