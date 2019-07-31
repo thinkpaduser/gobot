@@ -51,7 +51,7 @@ func initMsgDB(filename string) (err error) { // Importing messages hash table
         return
 }
 
-func TraverseMap(m map[string][]string, s string) string {
+func FindAnswer(m map[string][]string, s string) string {
 	var res string
 	for k, v := range m {
 		if strings.Contains(strings.ToLower(s), k) {
@@ -96,8 +96,8 @@ func main() {
 		}
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		if TraverseMap(mess, msg.Text) != "" {
-			msg.Text = TraverseMap(mess, msg.Text)
+		if FindAnswer(mess, msg.Text) != "" {
+			msg.Text = FindAnswer(mess, msg.Text)
 			bot.Send(msg)
 		}
 	}
