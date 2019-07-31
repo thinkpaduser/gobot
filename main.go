@@ -54,7 +54,7 @@ func initMsgDB(filename string) (err error) { // Importing messages hash table
 func TraverseMap(m map[string][]string, s string) string {
 	var res string
 	for k, v := range m {
-		if strings.Contains(s, k) {
+		if strings.Contains(strings.ToLower(s), k) {
 			res = RandomizeAnswers(v)
 		}
 	}
