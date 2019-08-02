@@ -50,19 +50,32 @@ func initMsgDB(filename string) (err error) { // Importing messages hash table
         }
         return
 }
-
 func FindAnswer(m map[string][]string, s string) string {
 	var res string
-	for k, v := range m {
+	var keys []string
+	for k, _ := range m {
 		if strings.Contains(strings.ToLower(s), k) {
-			res = RandomizeAnswers(v)
+			keys = append(keys, k)
 		}
+		if keys != nil {
+			randk := RandomizeAnswers(keys)
+			res = RandomizeAnswers(m[randk])
+		}
+	}
+	return res
+}
+func GetChance(k int, s string) string {
+	s1 := rand.NewSource(time.Now().UnixNano())
+	var res string
+        if rand.New(s1).Intn(10) * k / 10 >= 5 {
+		res = s
 	}
 	return res
 }
 
 func main() {
 	proxyUrl, err := url.Parse("socks5://127.0.0.1:9050") // Proxy pass
+	var gab int
 	if err != nil {
 		log.Panic(err)
 	}
@@ -96,7 +109,16 @@ func main() {
 		}
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		if FindAnswer(mess, msg.Text) != "" {
+		ticker := time.NewTicker(time.Minute * 90 )
+		go func() {
+			for t := range ticker.C {
+				msg.Text = "@Ainenya, чекни ЛС"
+				log.Printf("Ticker", t)
+				bot.Send(msg)
+			}
+		}()
+		gab = 9
+		if GetChance(gab, FindAnswer(mess, msg.Text)) != "" {
 			msg.Text = FindAnswer(mess, msg.Text)
 			bot.Send(msg)
 		}
