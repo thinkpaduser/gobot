@@ -16,12 +16,14 @@ import (
 var conf *config.Config
 var mess config.MsgDB
 
-func RandomizeAnswers(Collection []string) string { // Returns the random value from an array
+// Returns a random element from array
+func RandomizeAnswers(Collection []string) string {
 	s1 := rand.NewSource(time.Now().UnixNano())
 	AnsIndex := rand.New(s1).Intn(len(Collection))
 	return Collection[AnsIndex]
 }
 
+// Load configs and YAML msg library
 func init() {
 	const (
 		defaultConfigFilename   = "./configs/conf.yaml"
@@ -51,6 +53,8 @@ func initMsgDB(filename string) (err error) { // Importing messages hash table
 	}
 	return
 }
+
+// Get an answer from msg library by keys
 func FindAnswer(m map[string][]string, s string) string {
 	var res string
 	var keys []string
@@ -65,6 +69,8 @@ func FindAnswer(m map[string][]string, s string) string {
 	}
 	return res
 }
+
+// Get a chance of answering or not
 func GetChance(k int, s string) string {
 	s1 := rand.NewSource(time.Now().UnixNano())
 	var res string
@@ -74,6 +80,7 @@ func GetChance(k int, s string) string {
 	return res
 }
 
+// Append to a slice distinct values
 func AppendIfMissing(slice []string, s string) []string {
 	for _, ele := range slice {
 		if ele == s {
@@ -83,11 +90,13 @@ func AppendIfMissing(slice []string, s string) []string {
 	return append(slice, s)
 }
 
-//func GetUserID
 func main() {
 	proxyUrl, err := url.Parse("socks5://127.0.0.1:9050") // Proxy pass
 	ticker := time.NewTicker(time.Minute * 60)
 	var gab int
+	/* TODO: will send checknils() to all available chats at once
+	chatmembers := make(map[int]string) // k: UsrID; v: Username
+	chats := make(map[int]map[int]int)  // k: ChatID; v: chatmembers */
 	var members []string
 	if err != nil {
 		log.Panic(err)
