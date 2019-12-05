@@ -2,17 +2,19 @@ package config
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+
+	"gopkg.in/yaml.v2"
 )
 
 type MsgDB map[string][]string
 
 type Config struct {
 	Conf struct {
-		Token string `yaml:"token"`
-		Debug bool   `yaml:"debug"`
+		Token  string `yaml:"token"`
+		Debug  bool   `yaml:"debug"`
+		Target string `yaml:"target"`
 	}
 }
 
