@@ -1,3 +1,4 @@
 conf:
   token: "your_token"
   debug: true
+  target: "target_username"
