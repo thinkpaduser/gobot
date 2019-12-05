@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"regexp"
 )
 
 var conf *config.Config
