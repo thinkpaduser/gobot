@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"regexp"
 )
 
 var conf *config.Config
@@ -62,6 +63,12 @@ func FindAnswer(m map[string][]string, s string) string {
 		if strings.Contains(strings.ToLower(s), k) {
 			keys = append(keys, k)
 		}
+		
+		iq, _ := regexp.MatchString(`.*\?$`, s)
+		if iq {
+			res = "дай аналог лол"
+		}
+		
 		if keys != nil {
 			randk := RandomizeAnswers(keys)
 			res = RandomizeAnswers(m[randk])
