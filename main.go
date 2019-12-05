@@ -1,17 +1,18 @@
 package main
 
 import (
-	"./pkg"
 	"flag"
 	"fmt"
-	"github.com/Syfaro/telegram-bot-api"
 	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
-	"regexp"
+
+	config "./pkg"
+	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
 
 var conf *config.Config
@@ -56,23 +57,27 @@ func initMsgDB(filename string) (err error) { // Importing messages hash table
 }
 
 // Get an answer from msg library by keys
-func FindAnswer(m map[string][]string, s string) string {
+func FindAnswer(m map[string][]string, s string, usr string) string {
 	var res string
 	var keys []string
-	for k, _ := range m {
+
+	for k := range m {
+
 		if strings.Contains(strings.ToLower(s), k) {
 			keys = append(keys, k)
 		}
-		
+
 		iq, _ := regexp.MatchString(`.*\?$`, s)
-		if iq {
+
+		if iq && usr == conf.Conf.Target {
 			res = "дай аналог лол"
 		}
-		
+
 		if keys != nil {
 			randk := RandomizeAnswers(keys)
 			res = RandomizeAnswers(m[randk])
 		}
+
 	}
 	return res
 }
@@ -152,8 +157,8 @@ func main() {
 		}()
 
 		gab = 9
-		if GetChance(gab, FindAnswer(mess, msg.Text)) != "" {
-			msg.Text = FindAnswer(mess, msg.Text)
+		if GetChance(gab, FindAnswer(mess, msg.Text, usrID)) != "" {
+			msg.Text = FindAnswer(mess, msg.Text, usrID)
 			bot.Send(msg)
 		}
 	}
