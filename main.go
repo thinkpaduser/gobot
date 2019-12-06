@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	config "./pkg"
+	config "github.com/thinkpaduser/gobot/pkg"
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
 
@@ -19,10 +19,13 @@ var conf *config.Config
 var mess config.MsgDB
 
 // Returns a random element from array
-func RandomizeAnswers(Collection []string) string {
-	s1 := rand.NewSource(time.Now().UnixNano())
-	AnsIndex := rand.New(s1).Intn(len(Collection))
-	return Collection[AnsIndex]
+func Random(Collection []string) string {
+	return Collection[RandomInt(len(Collection))]
+}
+
+func RandomInt(Range int) int {
+	seed := rand.NewSource(time.Now().UnixNano())
+	return rand.New(seed).Intn(Range)
 }
 
 // Load configs and YAML msg library
@@ -74,8 +77,8 @@ func FindAnswer(m map[string][]string, s string, usr string) string {
 		}
 
 		if keys != nil {
-			randk := RandomizeAnswers(keys)
-			res = RandomizeAnswers(m[randk])
+			randk := Random(keys)
+			res = Random(m[randk])
 		}
 
 	}
@@ -84,9 +87,8 @@ func FindAnswer(m map[string][]string, s string, usr string) string {
 
 // Get a chance of answering or not
 func GetChance(k int, s string) string {
-	s1 := rand.NewSource(time.Now().UnixNano())
 	var res string
-	if rand.New(s1).Intn(10)*k/10 >= 5 {
+	if RandomInt(10)*k/10 >= 5 {
 		res = s
 	}
 	return res
@@ -104,7 +106,6 @@ func AppendIfMissing(slice []string, s string) []string {
 
 func main() {
 	proxyUrl, err := url.Parse("socks5://127.0.0.1:9050") // Proxy pass
-	ticker := time.NewTicker(time.Minute * 60)
 	var gab int
 	/* TODO: will send checknils() to all available chats at once
 	chatmembers := make(map[int]string) // k: UsrID; v: Username
@@ -148,8 +149,8 @@ func main() {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
 		go func() {
-			for t := range ticker.C {
-				luckyMan := RandomizeAnswers(members)
+			for t := range time.NewTicker(time.Minute * time.Duration(40 + RandomInt(40))).C {
+				luckyMan := Random(members)
 				msg.Text = "@" + luckyMan + " чекни ЛС"
 				log.Printf("Ticker", t)
 				bot.Send(msg)
