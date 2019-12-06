@@ -4,7 +4,7 @@ Simple and stupid bot really
 
 ## Requirements:
 
-  [Telegram Bot Api by Syfaro](github.com/Syfaro/telegram-bot-api).
+  [Telegram Bot Api by Syfaro](https://github.com/Syfaro/telegram-bot-api).
   You can `go get github.com/Syfaro/telegram-bot-api` to your `GOPATH/src/`
 
 ## Features:
