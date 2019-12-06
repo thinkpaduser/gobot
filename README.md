@@ -6,7 +6,7 @@ Simple and stupid bot really
 
 -  [Telegram Bot Api by Syfaro](https://github.com/Syfaro/telegram-bot-api).
 -  [Yaml v2](https://gopkg.in/yaml.v2).
-  You can `go get github.com/Syfaro/telegram-bot-api` to your `GOPATH/src/`
+-  You can `go get github.com/Syfaro/telegram-bot-api` and `go get gopkg.in/yaml.v2` to your `GOPATH/src/`
 
 ## Features:
 
