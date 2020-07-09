@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/thinkpaduser/gobot/pkg/config"
+	"github.com/thinkpaduser/gobot/pkg/static"
 	"log"
 	"math/rand"
 	"net/http"
@@ -11,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	config "github.com/thinkpaduser/gobot/pkg"
 	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
 
@@ -105,57 +106,62 @@ func AppendIfMissing(slice []string, s string) []string {
 }
 
 func main() {
+
 	proxyUrl, err := url.Parse("socks5://127.0.0.1:9050") // Proxy pass
 	var gab int
-	/* TODO: will send checknils() to all available chats at once
-	chatmembers := make(map[int]string) // k: UsrID; v: Username
-	chats := make(map[int]map[int]int)  // k: ChatID; v: chatmembers */
+
 	var members []string
 	if err != nil {
 		log.Panic(err)
 	}
 	transport := &http.Transport{Proxy: http.ProxyURL(proxyUrl)}
 	client := &http.Client{Transport: transport}
-	// Auth section
-	bot, err := tgbotapi.NewBotAPIWithClient(conf.Conf.Token, client)
+
+	bot, err := tgbotapi.NewBotAPIWithClient(conf.Conf.Token, tgbotapi.APIEndpoint, client)
 	if err != nil {
 		log.Panic(err)
 	}
 	//bot.Debug = true
 	log.Printf("Authorized on account: %s", bot.Self.UserName)
 	u := tgbotapi.NewUpdate(0)
+	//goTimeout := 60 * time.Minute
 	u.Timeout = 60
 	updates, err := bot.GetUpdatesChan(u)
 	for update := range updates {
 		if update.Message == nil {
 			continue
 		}
+		lastMsgTime := time.Now()
 		if update.Message.IsCommand() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 			switch update.Message.Command() {
 			case "about":
-				msg.Text = "Меня зовут Гореси. Если вы считаете, что я имею отношение к любому реальному человеку, или являюсь какой-либо отсылкой, то вы, наверное, долбоёб"
+				msg.Text = static.Commands.ABOUT
 			case "abuse":
-				msg.Text = "Список актуальных абуз KFC: 3870 - боксмастер, картошка, напиток 300мл - 184р (ТОП); 3869 - любой кофе 200мл - 45р; 3878 - твистер, картошка, напиток 400мл - 169р "
+				msg.Text = static.Commands.ABUSE
 			default:
-				msg.Text = "Error: ты пидор, нет такой команды"
+				msg.Text = ""
 			}
 			bot.Send(msg)
 		}
 		usrID := update.Message.From.String()
+
 		members = AppendIfMissing(members, usrID)
 		fmt.Println(members)
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
-		go func() {
-			for t := range time.NewTicker(time.Minute * time.Duration(40 + RandomInt(40))).C {
+		go func(lastMsg time.Time) {
+			for t := range time.NewTicker(time.Minute * 60).C {
+				if time.Since(lastMsg) > 80 * time.Minute {
+					continue
+				}
 				luckyMan := Random(members)
 				msg.Text = "@" + luckyMan + " чекни ЛС"
 				log.Printf("Ticker", t)
 				bot.Send(msg)
 			}
-		}()
+		}(lastMsgTime)
 
 		gab = 9
 		if GetChance(gab, FindAnswer(mess, msg.Text, usrID)) != "" {
