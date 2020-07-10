@@ -2,13 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/thinkpaduser/gobot/pkg/config"
 	"github.com/thinkpaduser/gobot/pkg/static"
+	"github.com/thinkpaduser/gobot/pkg/utils"
 	"log"
 	"math/rand"
-	"net/http"
-	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -46,6 +44,7 @@ func init() {
 		log.Panic("Can't init messages storage: %s", err.Error())
 	}
 }
+
 func initConf(filename string) (err error) { // Importing config structure
 	if conf, err = config.NewConf(filename); err != nil {
 		return
@@ -71,15 +70,14 @@ func FindAnswer(m map[string][]string, s string, usr string) string {
 			keys = append(keys, k)
 		}
 
-		iq, _ := regexp.MatchString(`.*\?$`, s)
-
-		if iq && usr == conf.Conf.Target {
+		isQuestion, _ := regexp.MatchString(`.*\?$`, s)
+		if isQuestion && usr == conf.Conf.Target {
 			res = "дай аналог лол"
 		}
 
 		if keys != nil {
-			randk := Random(keys)
-			res = Random(m[randk])
+			key := Random(keys)
+			res = Random(m[key])
 		}
 
 	}
@@ -106,27 +104,23 @@ func AppendIfMissing(slice []string, s string) []string {
 }
 
 func main() {
-
-	proxyUrl, err := url.Parse("socks5://127.0.0.1:9050") // Proxy pass
-	var gab int
-
 	var members []string
-	if err != nil {
-		log.Panic(err)
-	}
-	transport := &http.Transport{Proxy: http.ProxyURL(proxyUrl)}
-	client := &http.Client{Transport: transport}
 
+	client := utils.NewTorClient()
 	bot, err := tgbotapi.NewBotAPIWithClient(conf.Conf.Token, tgbotapi.APIEndpoint, client)
 	if err != nil {
-		log.Panic(err)
+		log.Fatalf("can't init a client: %s", err.Error())
 	}
 	//bot.Debug = true
 	log.Printf("Authorized on account: %s", bot.Self.UserName)
 	u := tgbotapi.NewUpdate(0)
-	//goTimeout := 60 * time.Minute
+
 	u.Timeout = 60
 	updates, err := bot.GetUpdatesChan(u)
+	if err != nil {
+		log.Fatalf("can't get updates: %s", err.Error())
+	}
+
 	for update := range updates {
 		if update.Message == nil {
 			continue
@@ -144,11 +138,13 @@ func main() {
 			}
 			bot.Send(msg)
 		}
-		usrID := update.Message.From.String()
 
+		usrID := update.Message.From.String()
 		members = AppendIfMissing(members, usrID)
-		fmt.Println(members)
+		log.Println(members)
+
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
 		go func(lastMsg time.Time) {
@@ -158,13 +154,13 @@ func main() {
 				}
 				luckyMan := Random(members)
 				msg.Text = "@" + luckyMan + " чекни ЛС"
-				log.Printf("Ticker", t)
+				log.Printf("Ticker, %v", t)
 				bot.Send(msg)
 			}
 		}(lastMsgTime)
 
-		gab = 9
-		if GetChance(gab, FindAnswer(mess, msg.Text, usrID)) != "" {
+		tempMultiplier := 9 // TODO: refactor or remove this useless crap
+		if GetChance(tempMultiplier, FindAnswer(mess, msg.Text, usrID)) != "" {
 			msg.Text = FindAnswer(mess, msg.Text, usrID)
 			bot.Send(msg)
 		}
